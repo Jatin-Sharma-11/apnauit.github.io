@@ -1,0 +1,122 @@
+.sidebar{
+    width: 50px;
+    height: 100vh;
+    background:linear-gradient(black,maroon);
+    position: absolute;
+    right: 0;
+    top: 51px;
+}
+.menu{
+    display: block;
+    width: 25px;
+    margin: 40px auto 0;
+    cursor: pointer;
+}
+.social-links img , .useful-links img{
+    width: 25px;
+    margin: 5px auto;
+    cursor: pointer;
+
+}
+.social-links{
+    width: 50px;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+
+.banner{
+    width: 100%;
+    height: 100vh;
+
+    background-image: url(img/banner.jpeg);
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+
+}
+html, body {
+    margin: 50px;
+    padding: 0;
+    background: #000;
+  }
+.heading{
+    color: maroon;
+  
+    font-family: cursive;
+}
+.para{
+    color: whitesmoke;
+    font-family: 'Courier New', Courier, monospace;
+
+}
+h3{
+    color: aquamarine;
+}
+.container{
+    width: 100%;
+}
+footer{
+    background-color: maroon;
+    width: 100%;
+}
+footer a{
+    color: white;
+    
+}
+footer a:hover{
+    color: azure;
+}
+.xt{
+    left: 2.5% ;
+    transform: translateX(2.5%);
+}
+.accessible{
+    width: 18.5%;
+    background: linear-gradient(rgb(226, 59, 96) , maroon);
+    color:azure;
+}
+.digital{
+    width: 18.5%;
+    color:azure;
+    background: linear-gradient(rgb(180, 55, 139) ,seagreen);
+}
+.cloud{
+    width: 19.3%;
+     color: azure;
+    background: linear-gradient(rgb(18, 82, 119),rgb(65, 136, 44));
+}
+.update{
+    width: 18.5%;
+    color: azure;
+    background: linear-gradient(rgb(216, 168, 10) ,rgb(94, 27, 41));
+}
+.contribute{
+    width: 20%;
+    color: azure;
+    background: linear-gradient(rgb(95, 25, 151),blue);
+}
+h2{
+    color:rgb(15, 248, 248);
+}
+#line{
+     color: whitesmoke;
+     text-align: center;
+}
+#us{
+    font-size:80px;
+}
+.ttl{
+    text-align: center;
+    background: linear-gradient(rgb(0, 0, 0),silver);
+    width: 720px;
+    left: 23%;
+    transform: translateX(23%);
+    color: aquamarine;
+}
+.butn{
+    margin-left:340px;
+}

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="bootstrap\css\bootstrap.min.css" type="text/css">
+   
+    <script type="text/javascript" src="bootstrap\js\jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="bootstrap\js\bootstrap.min.js"></script>
+    <style>
+        #snowflakeContainer {
+          position: absolute;
+          left: 0px;
+          top: 0px;
+          display: none;
+        }
+      
+        .snowflake {
+          position: fixed;
+          background-color: #CCC;
+          user-select: none;
+          z-index: 1000;
+          pointer-events: none;
+          border-radius: 50%;
+          width: 10px;
+          height: 10px;
+        }
+      </style>
+      
+      <div id="snowflakeContainer">
+        <span class="snowflake"></span>
+      </div>
+      
+      <script>
+        // Array to store our Snowflake objects
+        var snowflakes = [];
+      
+        // Global variables to store our browser's window size
+        var browserWidth;
+        var browserHeight;
+      
+        // Specify the number of snowflakes you want visible
+        var numberOfSnowflakes = 50;
+      
+        // Flag to reset the position of the snowflakes
+        var resetPosition = false;
+      
+        // Handle accessibility
+        var enableAnimations = false;
+        var reduceMotionQuery = matchMedia("(prefers-reduced-motion)");
+      
+        // Handle animation accessibility preferences 
+        function setAccessibilityState() {
+          if (reduceMotionQuery.matches) {
+            enableAnimations = false;
+          } else { 
+            enableAnimations = true;
+          }
+        }
+        setAccessibilityState();
+      
+        reduceMotionQuery.addListener(setAccessibilityState);
+      
+        //
+        // It all starts here...
+        //
+        function setup() {
+          if (enableAnimations) {
+            window.addEventListener("DOMContentLoaded", generateSnowflakes, false);
+            window.addEventListener("resize", setResetFlag, false);
+          }
+        }
+        setup();
+      
+        //
+        // Constructor for our Snowflake object
+        //
+        function Snowflake(element, speed, xPos, yPos) {
+          // set initial snowflake properties
+          this.element = element;
+          this.speed = speed;
+          this.xPos = xPos;
+          this.yPos = yPos;
+          this.scale = 1;
+      
+          // declare variables used for snowflake's motion
+          this.counter = 0;
+          this.sign = Math.random() < 0.5 ? 1 : -1;
+      
+          // setting an initial opacity and size for our snowflake
+          this.element.style.opacity = (.1 + Math.random()) / 3;
+        }
+      
+        //
+        // The function responsible for actually moving our snowflake
+        //
+        Snowflake.prototype.update = function () {
+          // using some trigonometry to determine our x and y position
+          this.counter += this.speed / 5000;
+          this.xPos += this.sign * this.speed * Math.cos(this.counter) / 40;
+          this.yPos += Math.sin(this.counter) / 40 + this.speed / 30;
+          this.scale = .5 + Math.abs(10 * Math.cos(this.counter) / 20);
+      
+          // setting our snowflake's position
+          setTransform(Math.round(this.xPos), Math.round(this.yPos), this.scale, this.element);
+      
+          // if snowflake goes below the browser window, move it back to the top
+          if (this.yPos > browserHeight) {
+            this.yPos = -50;
+          }
+        }
+      
+        //
+        // A performant way to set your snowflake's position and size
+        //
+        function setTransform(xPos, yPos, scale, el) {
+          el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0) scale(${scale}, ${scale})`;
+        }
+      
+        //
+        // The function responsible for creating the snowflake
+        //
+        function generateSnowflakes() {
+      
+          // get our snowflake element from the DOM and store it
+          var originalSnowflake = document.querySelector(".snowflake");
+      
+          // access our snowflake element's parent container
+          var snowflakeContainer = originalSnowflake.parentNode;
+          snowflakeContainer.style.display = "block";
+      
+          // get our browser's size
+          browserWidth = document.documentElement.clientWidth;
+          browserHeight = document.documentElement.clientHeight;
+      
+          // create each individual snowflake
+          for (var i = 0; i < numberOfSnowflakes; i++) {
+      
+            // clone our original snowflake and add it to snowflakeContainer
+            var snowflakeClone = originalSnowflake.cloneNode(true);
+            snowflakeContainer.appendChild(snowflakeClone);
+      
+            // set our snowflake's initial position and related properties
+            var initialXPos = getPosition(50, browserWidth);
+            var initialYPos = getPosition(50, browserHeight);
+            var speed = 5 + Math.random() * 40;
+      
+            // create our Snowflake object
+            var snowflakeObject = new Snowflake(snowflakeClone,
+              speed,
+              initialXPos,
+              initialYPos);
+            snowflakes.push(snowflakeObject);
+          }
+      
+          // remove the original snowflake because we no longer need it visible
+          snowflakeContainer.removeChild(originalSnowflake);
+      
+          moveSnowflakes();
+        }
+      
+        //
+        // Responsible for moving each snowflake by calling its update function
+        //
+        function moveSnowflakes() {
+      
+          if (enableAnimations) {
+            for (var i = 0; i < snowflakes.length; i++) {
+              var snowflake = snowflakes[i];
+              snowflake.update();
+            }      
+          }
+      
+          // Reset the position of all the snowflakes to a new value
+          if (resetPosition) {
+            browserWidth = document.documentElement.clientWidth;
+            browserHeight = document.documentElement.clientHeight;
+      
+            for (var i = 0; i < snowflakes.length; i++) {
+              var snowflake = snowflakes[i];
+      
+              snowflake.xPos = getPosition(50, browserWidth);
+              snowflake.yPos = getPosition(50, browserHeight);
+            }
+      
+            resetPosition = false;
+          }
+      
+          requestAnimationFrame(moveSnowflakes);
+        }
+      
+        //
+        // This function returns a number between (maximum - offset) and (maximum + offset)
+        //
+        function getPosition(offset, size) {
+          return Math.round(-1 * offset + Math.random() * (size + 2 * offset));
+        }
+      
+        //
+        // Trigger a reset of all the snowflakes' positions
+        //
+        function setResetFlag(e) {
+          resetPosition = true;
+        }
+      </script>
+    <link rel="stylesheet" href="style.css" type="text/css">   
+</head>
+<body>
+    
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse " data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+    
+                </button>
+                <img src="img/s-logo.png" alt="" width="60px" height="50px">
+                <a href="home.uit.html" class="navbar-brand" style="font-family: cursive;">UIT Squad  </a>
+    
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbarS">
+                <ul class="nav navbar-nav navbar-right">
+                   <li><a href="#notes"><span class="glyphicon glyphicon-education"></span>Notes</a></li>
+                   <li><a href="#ebooks"><span class="glyphicon glyphicon-book"></span>E-books</a></li>
+                </ul>
+            </div>
+            <div class="sidebar">
+               <div class="social-links">
+                   <a href="https://www.facebook.com/hpuiitshimla/" target="_blank"><img src="img/fb.png" ></a>
+                   <a href="https://www.instagram.com/jatin_sharma_d/?hl=en" target="_blank"><img src="img/ig.png" ></a>
+                    <a href="https://twitter.com/JatinSh61029857" target="_blank"><img src="img/tw.png" ></a> 
+               </div>
+              
+        </div>
+   </nav>
+   <div class="conatainer">
+         <div class="content">
+           <br><br>
+               <h1 class="heading"><b> <span class="	glyphicon glyphicon-menu-right"></span> Overview</b></h1>
+               <p class="para">This website is build for the help of new emmerging enginneers of society . The website welcomes the young minds to show their skills and potential by contributing this open and free to all website . In this website you will get the fresh and orginal notes of enginneering subjects specially designed by the highly qualified and talented faculty of Himachal Pardesh University . These notes will definetely help the college student to score extra-ordinary grades in their semester exams .  </p>
+               
+               <p class="para">With the time this website is going to launch some free courses and other platforms like web-development , graphic designing , java script ,node-js ,angular-js etc</p>
+                <p class="para">With all these things you will also get the latest information regarding different interships (like:- where to apply ,how to apply etc),apart of this this will help students to design there  busy schedule  with our upcoming time management tool powered by artificial intellegence.</p>
+            </div>
+
+  </div>
+  <div class="container heading" id="notes">
+      <h1> <span class="glyphicon glyphicon-education"></span> Notes :</h1>
+      <br>
+      <h3>1. Applied Physics</h3>
+      <br>
+  </div>
+  <div class="container">
+    <div class="row text-center">
+        <div class=" col-md-3 col-sm-6">
+            <a href="physics notes 1st sem/A1-Interferenc.pdf"  class="thumbnail"><img src="img/IMG-PA.png" alt="canon eos responsive"></a>
+            <div class="caption">
+                <a href="physics notes 1st sem/A1-Interferenc.pdf" class="btn btn-primary btn-block">View</a>
+            </div>
+        </div>
+        <div class=" col-md-3 col-sm-6">
+            <a href="physics notes 1st sem/A2-Diffraction.pdf"  class="thumbnail"><img src="img/IMG-PB.png" alt="sony DSLR responsive"></a>
+            <div class="caption">
+              
+                <a href="physics notes 1st sem/A2-Diffraction.pdf" class="btn btn-primary btn-block">View</a>
+            </div>
+        </div>
+        <div class=" col-md-3 col-sm-6">
+           <a href="physics notes 1st sem/A3-Relativity.pdf"  class="thumbnail"><img src="img/IMG-PC.png" alt="Sony DSLR responsive"></a>
+           <div class="caption">
+               <a href="physics notes 1st sem/A3-Relativity.pdf" class="btn btn-primary btn-block">View</a>
+           </div>
+       </div>
+       <div class=" col-md-3 col-sm-6">
+           <a href="physics notes 1st sem/A4-EM Waves.pdf"  class="thumbnail"><img src="img/IMG-PD.png" alt="olympus DSLR responsive"></a>
+           <div class="caption">
+               <a href="physics notes 1st sem/A4-EM Waves.pdf" class="btn btn-primary btn-block">View</a>
+           </div>
+       </div>
+
+        </div>
+    </div>
+</div>
+<br><br>
+<div class="container ">
+     <div class="row text-center">
+         <div class=" col-md-3 col-sm-6">
+            <a href="physics notes 1st sem/B-Quantum Mechanics.pdf"  class="thumbnail"><img src="img/IMG-PE.png" alt=" titan responsive"></a>
+             <div class="caption">
+                 <a href="physics notes 1st sem/B-Quantum Mechanics.pdf" class="btn btn-primary btn-block">View</a>
+             </div>
+         </div>
+         <div class=" col-md-3 col-sm-6">
+             <a href="physics notes 1st sem/SECTION-C.pdf"  class="thumbnail"><img src="img/IMG-PF.png" alt="titan responsive"></a>
+             <div class="caption">
+                  <a href="physics notes 1st sem/SECTION-C.pdf" class="btn btn-primary btn-block">View</a>
+             </div>
+          </div>
+          <div class=" col-md-3 col-sm-6">
+             <a href="physics notes 1st sem/C3-Superconductivity.pdf"  class="thumbnail"><img src="img/IMG-PG.png" alt="hmt responsive"></a>
+             <div class="caption">
+                  <a href="physics notes 1st sem/C3-Superconductivity.pdf" class="btn btn-primary btn-block">View</a>
+             </div>
+         </div>
+
+     </div>
+    
+</div>
+<br><br>
+<div class="container heading">
+    <h1> <span class="glyphicon glyphicon-lamp"></span>Practicals :</h1>
+    <br>
+    <h3>1. Physics Practicals</h3>
+    <br>
+</div>
+
+<div class="container">
+   <div class="row text-center">
+       <div class=" col-md-3 col-sm-6">
+          <a href="physics notes 1st sem/practicals/Experiment -1.pdf"  class="thumbnail"><img src="img/IMG-PP1.png" alt=" H&w responsive"></a>
+           <div class="caption">
+               <a href="physics notes 1st sem/practicals/Experiment -1.pdf" class="btn btn-primary btn-block">View</a>
+           </div>
+       </div>
+       <div class=" col-md-3 col-sm-6">
+           <a href="physics notes 1st sem/practicals/EXPERIMENT NO2.pdf"  class="thumbnail"><img src="img/IMG-PP2.png" alt="louis responsive"></a>
+           <div class="caption">
+                <a href="physics notes 1st sem/practicals/EXPERIMENT NO2.pdf" class="btn btn-primary btn-block">View</a>
+           </div>
+        </div>
+        <div class=" col-md-3 col-sm-6">
+           <a href="physics notes 1st sem/practicals/Experiment-3.pdf"  class="thumbnail"><img src="img/IMG-PP3.png" alt="john jock responsive"></a>
+           <div class="caption">
+                <a href="physics notes 1st sem/practicals/Experiment-3.pdf" class="btn btn-primary btn-block">View</a>
+           </div>
+       </div>
+       <div class=" col-md-3 col-sm-6">
+            <a href="physics notes 1st sem/practicals/Experiment No-4.pdf"  class="thumbnail"><img src="img/IMG-PP4.png" alt="jhalsani responsive"></a>
+            <div class="caption">
+               <a href="physics notes 1st sem/practicals/Experiment No-4.pdf" class="btn btn-primary btn-block">View</a>
+            </div>
+        </div>
+
+   </div>
+  
+</div>
+<div class="container heading" id="ebooks">
+    <h1> <span class="glyphicon glyphicon-book"></span> E-books :</h1>
+    
+    <br>
+    <h3>E-books will be provided very soon</h3>
+    <small>Stay tunned</small>
+</div>
+<br><br><br><br>
+
+    <footer>
+  
+       <center>
+          <a href="#">Copyright © UIT Squad. All Rights Reserved &nbsp;|&nbsp;Contact Us: +91 7876325027</a>
+      </center>
+   
+     </footer>
+
+ 
+    
+</body>
+</html>
